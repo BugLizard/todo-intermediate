@@ -68,16 +68,17 @@ const Todo:React.FC = () => {
     }
     switch(editTodoState) {
       case 'Untouched':
-        setUntouchedTodoList([...untouchedTodoList, newTodo]);
+        untouchedTodoList.splice(id-1, 1, newTodo);
       break;
 
       case 'Start':
-        setStartTodoList([...startTodoList, newTodo]);
+        startTodoList.splice(id-1, 1, newTodo);
       break;
 
       case 'Complete':
-        setCompleteTodoList([...completeTodoList, newTodo]);
+        completeTodoList.splice(id-1, 1, newTodo);
       break;
+
       default:
         alert('異常な操作');
     }
@@ -193,7 +194,15 @@ const Todo:React.FC = () => {
                   stateChangeTodo(todo.id, 'FormStartToComplete');
                 }}
               ><CheckIcon /></Button>
-              <EditModal />
+              <EditModal
+                editTodo={editTodo} 
+                todoId={todo.id} 
+                status={'Start'} 
+                setTextName={setTextName}
+                setTextDetail={setTextDetail}
+                textName={textName}
+                textDetail={textDetail}
+              />
               <Button
                 onClick={() => {
                   stateChangeTodo(todo.id, 'FormStartToUntouched');
@@ -215,7 +224,15 @@ const Todo:React.FC = () => {
               <br/>
               {todo.detail}
               <br/>
-              <EditModal />
+              <EditModal 
+                editTodo={editTodo} 
+                todoId={todo.id} 
+                status={'complete'} 
+                setTextName={setTextName}
+                setTextDetail={setTextDetail}
+                textName={textName}
+                textDetail={textDetail}
+                />
               <Button
                 onClick={() => {
                   stateChangeTodo(todo.id, 'FormCompleteToStart');
