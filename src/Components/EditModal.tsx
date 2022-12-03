@@ -16,7 +16,21 @@ import {
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Props } from "framer-motion/types/types";
+
+import {Dispatch, SetStateAction } from "react";
+type Props = {
+  editTodo: (
+    id: number,
+    editTodoState: string,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  todoId: number;
+  status: string;
+  setTextName: Dispatch<SetStateAction<string>>;
+  setTextDetail: Dispatch<SetStateAction<string>>;
+  textName: string;
+  textDetail: string;
+}
 
 export const EditModal: React.FC<Props> = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -38,7 +52,6 @@ export const EditModal: React.FC<Props> = (props) => {
                   props.setTextName(e.target.value)
                 }}
                 className='textNameInput'
-                placeholder='買い物に行く'
               />
               <Spacer h={4} />
               <FormLabel>詳細</FormLabel>
@@ -53,7 +66,7 @@ export const EditModal: React.FC<Props> = (props) => {
           </ModalBody>
           <ModalFooter>
             <HStack spacing={3}>
-              <Button onClick={props.editTodo(props.todoId, props.status)}><CheckIcon /></Button>
+              <Button disabled={props.textName === ''} onClick={(e) => props.editTodo(props.todoId, props.status, e)}><CheckIcon /></Button>
               <Button onClick={onClose}><CloseIcon /></Button>
             </HStack>
           </ModalFooter>
