@@ -15,7 +15,6 @@ import { EditModal } from './EditModal';
 import FilterMenu from './FilterMenu';
 
 type TodoList = {
-  id: number,
   name: string,
   detail: string,
 }
@@ -37,7 +36,6 @@ const Todo:React.FC = () => {
   const onClickSetTodo = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const newTodo: TodoList = {
-      id: untouchedTodoList.length + 1,
       name: textName,
       detail: textDetail,
     }
@@ -50,13 +48,13 @@ const Todo:React.FC = () => {
   const deleteTodo =  (id: number, status: string) => {
     switch(status){
       case 'Untouched':
-      setUntouchedTodoList(untouchedTodoList.filter((todo) => todo.id !== id));
+      setUntouchedTodoList(untouchedTodoList.filter((todo, index) => index !== id));
       break;
       case 'Start':
-        setStartTodoList(startTodoList.filter((todo) => todo.id !== id));
+        setStartTodoList(startTodoList.filter((todo, index) => index !== id));
         break;
       case 'Complete':
-        setCompleteTodoList(completeTodoList.filter((todo) => todo.id !== id));
+        setCompleteTodoList(completeTodoList.filter((todo, index) => index !== id));
         break;
       default:
         alert('異常な操作');
@@ -67,7 +65,6 @@ const Todo:React.FC = () => {
     e.preventDefault();
     if(setTextName === null && setTextDetail === null) return;
     const newTodo: TodoList = {
-      id: id,
       name: textName,
       detail: textDetail,
     }
@@ -75,19 +72,19 @@ const Todo:React.FC = () => {
     switch(editTodoState) {
       case 'Untouched':
         todosCopy = [...untouchedTodoList];
-        todosCopy.splice(id-1, 1, newTodo);
+        todosCopy.splice(id, 1, newTodo);
         setUntouchedTodoList(todosCopy);
       break;
 
       case 'Start':
         todosCopy = [...startTodoList];
-        todosCopy.splice(id-1, 1, newTodo);
+        todosCopy.splice(id, 1, newTodo);
         setStartTodoList(todosCopy);
       break;
 
       case 'Complete':
         todosCopy = [...completeTodoList];
-        todosCopy.splice(id-1, 1, newTodo);
+        todosCopy.splice(id, 1, newTodo);
         setCompleteTodoList(todosCopy);
       break;
 
@@ -98,31 +95,52 @@ const Todo:React.FC = () => {
     setTextDetail('');
   }
 
-  const stateChangeTodo =  (id: number, moveTodoState:string) => {
+  const stateChangeTodo = (id: number, moveTodoState:string) => {
     let todosCopy = [];
     switch(moveTodoState){
       case 'FormUntouchedToStart':
-        setStartTodoList([...startTodoList, untouchedTodoList[id-1]]);
+
+        todosCopy = [...startTodoList];
+        todosCopy.push(untouchedTodoList[id]);
+        
+        setStartTodoList(todosCopy);
+
         todosCopy = [...untouchedTodoList];
-        todosCopy.splice(id-1, 1);
+        todosCopy.splice(id, 1);
+
         setUntouchedTodoList(todosCopy);
       break;
       case 'FormStartToUntouched':
-        setUntouchedTodoList([...untouchedTodoList, startTodoList[id-1]]);
+        todosCopy = [...untouchedTodoList];
+        todosCopy.push(startTodoList[id]);
+
+        setUntouchedTodoList(todosCopy);
+
         todosCopy = [...startTodoList];
-        todosCopy.splice(id-1, 1);
+        todosCopy.splice(id, 1);
+
         setStartTodoList(todosCopy);
         break;
       case 'FormStartToComplete':
-        setCompleteTodoList([...completeTodoList, startTodoList[id-1]]);
+        todosCopy = [...completeTodoList];
+        todosCopy.push(startTodoList[id]);
+
+        setCompleteTodoList(todosCopy);
+
         todosCopy = [...startTodoList];
-        todosCopy.splice(id-1, 1);
+        todosCopy.splice(id, 1);
+
         setStartTodoList(todosCopy);
         break;
       case 'FormCompleteToStart':
         setStartTodoList([...startTodoList, completeTodoList[id-1]]);
+        todosCopy = [...startTodoList];
+        todosCopy.push(completeTodoList[id]);
+
+        setStartTodoList(todosCopy);
+
         todosCopy = [...completeTodoList];
-        todosCopy.splice(id-1, 1);
+        todosCopy.splice(id, 1);
         setCompleteTodoList(todosCopy);
         break;
       default:
@@ -191,28 +209,28 @@ const Todo:React.FC = () => {
         <Box>
           <label>未着手</label>
           <ul style={{listStyle: 'none'}} className='untouchedList'>
-            {untouchedTodoList.map((todo) => (
+            {untouchedTodoList.map((todo, index) => (
               <li>
-                {todo.id} :【 {todo.name} 】
+                {index+1} :【 {todo.name} 】
                 <br/>
                 {todo.detail}
                 <br/>
                 <Button
                   onClick={
                     () => {
-                      stateChangeTodo(todo.id, 'FormUntouchedToStart');
+                      stateChangeTodo(index, 'FormUntouchedToStart');
                     }}
                 ><CheckIcon /></Button>
                 <EditModal 
                   editTodo={editTodo} 
-                  todoId={todo.id} 
+                  todoId={index} 
                   status={'Untouched'} 
                   setTextName={setTextName} 
                   setTextDetail={setTextDetail}
                   textName={textName}
                   textDetail={textDetail}
                 />
-                <Button onClick={() => deleteTodo(todo.id, 'Untouched')}>
+                <Button onClick={() => deleteTodo(index, 'Untouched')}>
                   <DeleteIcon />
                 </Button>
               </li>
@@ -224,20 +242,20 @@ const Todo:React.FC = () => {
         <Box>
           <label>着手</label>
           <ul style={{listStyle: 'none'}} className='startList'>
-            {startTodoList.map((todo) => (
+            {startTodoList.map((todo, index) => (
               <li>
-              {todo.id} :【 {todo.name} 】
+              {index + 1} :【 {todo.name} 】
               <br/>
               {todo.detail}
               <br/>
               <Button
                 onClick={() => {
-                  stateChangeTodo(todo.id, 'FormStartToComplete');
+                  stateChangeTodo(index, 'FormStartToComplete');
                 }}
               ><CheckIcon /></Button>
               <EditModal
                 editTodo={editTodo} 
-                todoId={todo.id} 
+                todoId={index} 
                 status={'Start'} 
                 setTextName={setTextName}
                 setTextDetail={setTextDetail}
@@ -246,31 +264,30 @@ const Todo:React.FC = () => {
               />
               <Button
                 onClick={() => {
-                  stateChangeTodo(todo.id, 'FormStartToUntouched');
+                  stateChangeTodo(index, 'FormStartToUntouched');
                 }}
               ><ArrowBackIcon /></Button>
-              <Button onClick={() => deleteTodo(todo.id, 'Start')}>
+              <Button onClick={() => deleteTodo(index, 'Start')}>
                 <DeleteIcon />
               </Button>
             </li>
           ))}
         </ul>
             </Box>
-
       }
       {completeListShow &&
         <Box>
           <label>完了</label>
           <ul style={{listStyle: 'none'}} className='completeList'>
-            {completeTodoList.map((todo) => (
+            {completeTodoList.map((todo, index) => (
               <li>
-                {todo.id} :【 {todo.name} 】
+                {index + 1} :【 {todo.name} 】
                 <br/>
                 {todo.detail}
                 <br/>
                 <EditModal 
                   editTodo={editTodo} 
-                  todoId={todo.id} 
+                  todoId={index} 
                   status={'Complete'} 
                   setTextName={setTextName}
                   setTextDetail={setTextDetail}
@@ -279,10 +296,10 @@ const Todo:React.FC = () => {
                   />
                 <Button
                   onClick={() => {
-                    stateChangeTodo(todo.id, 'FormCompleteToStart');
+                    stateChangeTodo(index, 'FormCompleteToStart');
                   }}
                 ><ArrowBackIcon /></Button>
-                <Button onClick={() => deleteTodo(todo.id, 'Complete')}>
+                <Button onClick={() => deleteTodo(index, 'Complete')}>
                   <DeleteIcon />
                 </Button>
               </li>
