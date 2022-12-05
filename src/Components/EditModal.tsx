@@ -1,4 +1,4 @@
-import { CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
+import { CheckIcon, EditIcon, RepeatIcon } from "@chakra-ui/icons";
 import {
   Modal as ChakraModal,
   ModalBody,
@@ -66,8 +66,13 @@ export const EditModal: React.FC<Props> = (props) => {
           </ModalBody>
           <ModalFooter>
             <HStack spacing={3}>
-              <Button disabled={props.textName === ''} onClick={(e) => props.editTodo(props.todoId, props.status, e)}><CheckIcon /></Button>
-              <Button onClick={onClose}><CloseIcon /></Button>
+              <Button disabled={props.textName === ''} 
+                onClick={
+                  (e) => {props.editTodo(props.todoId, props.status, e);                          
+              }}>
+                <RepeatIcon />
+              </Button>
+              <Button onClick={onClose}><CheckIcon /></Button>
             </HStack>
           </ModalFooter>
         </ModalContent>

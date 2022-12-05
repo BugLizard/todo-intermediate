@@ -12,6 +12,7 @@ import {
   VStack } from '@chakra-ui/react';
 import React, { useState } from 'react'
 import { EditModal } from './EditModal';
+import FilterMenu from './FilterMenu';
 
 type TodoList = {
   id: number,
@@ -23,6 +24,10 @@ const Todo:React.FC = () => {
   const [untouchedTodoList, setUntouchedTodoList] = useState<TodoList[]>([]);
   const [startTodoList, setStartTodoList] = useState<TodoList[]>([]);
   const[completeTodoList, setCompleteTodoList] = useState<TodoList[]>([]);
+
+  const [untouchedListShow, setUntouchedListShow] = useState(true);
+  const [startListShow, setStartListShow] = useState(true);
+  const [completeListShow, setCompleteListShow] = useState(true);
 
   const [textName, setTextName] = useState('');
   const [textDetail, setTextDetail] = useState('');
@@ -66,17 +71,24 @@ const Todo:React.FC = () => {
       name: textName,
       detail: textDetail,
     }
+    let todosCopy = [];
     switch(editTodoState) {
       case 'Untouched':
-        untouchedTodoList.splice(id-1, 1, newTodo);
+        todosCopy = [...untouchedTodoList];
+        todosCopy.splice(id-1, 1, newTodo);
+        setUntouchedTodoList(todosCopy);
       break;
 
       case 'Start':
-        startTodoList.splice(id-1, 1, newTodo);
+        todosCopy = [...startTodoList];
+        todosCopy.splice(id-1, 1, newTodo);
+        setStartTodoList(todosCopy);
       break;
 
       case 'Complete':
-        completeTodoList.splice(id-1, 1, newTodo);
+        todosCopy = [...completeTodoList];
+        todosCopy.splice(id-1, 1, newTodo);
+        setCompleteTodoList(todosCopy);
       break;
 
       default:
@@ -118,10 +130,33 @@ const Todo:React.FC = () => {
     }
   }
 
+  const FilterHandler = (status : string) => {
+    switch(status){
+      case 'Untouched':
+        setUntouchedListShow(true);
+        setStartListShow(false);
+        setCompleteListShow(false);
+      break;
+      case 'Start':
+        setStartListShow(true);
+        setUntouchedListShow(false);
+        setCompleteListShow(false);
+      break;
+      case 'Complete':
+        setCompleteListShow(true);
+        setUntouchedListShow(false);
+        setStartListShow(false);
+      break;
+      default:
+        setUntouchedListShow(true);
+        setStartListShow(true);
+        setCompleteListShow(true);
+    }
+  }
+
   return (
     <VStack>
     <Heading>Todo</Heading>
-    
       <Box>
         <Input 
           type='text'
@@ -148,43 +183,49 @@ const Todo:React.FC = () => {
         >
           <AddIcon />
         </Button>
+        <FilterMenu
+          FilterHandler={FilterHandler}
+        />
       </Box>
-      <Box>
-        <label>未着手</label>
-        <ul style={{listStyle: 'none'}} className='untouchedList'>
-          {untouchedTodoList.map((todo) => (
-            <li>
-              {todo.id} :【 {todo.name} 】
-              <br/>
-              {todo.detail}
-              <br/>
-              <Button
-                onClick={
-                  () => {
-                    stateChangeTodo(todo.id, 'FormUntouchedToStart');
-                  }}
-              ><CheckIcon /></Button>
-              <EditModal 
-                editTodo={editTodo} 
-                todoId={todo.id} 
-                status={'Untouched'} 
-                setTextName={setTextName} 
-                setTextDetail={setTextDetail}
-                textName={textName}
-                textDetail={textDetail}
-              />
-              <Button onClick={() => deleteTodo(todo.id, 'Untouched')}>
-                <DeleteIcon />
-              </Button>
-            </li>
-          ))}
-        </ul>
-      </Box>
-      <Box>
-        <label>着手</label>
-        <ul style={{listStyle: 'none'}} className='startList'>
-          {startTodoList.map((todo) => (
-            <li>
+      {untouchedListShow &&
+        <Box>
+          <label>未着手</label>
+          <ul style={{listStyle: 'none'}} className='untouchedList'>
+            {untouchedTodoList.map((todo) => (
+              <li>
+                {todo.id} :【 {todo.name} 】
+                <br/>
+                {todo.detail}
+                <br/>
+                <Button
+                  onClick={
+                    () => {
+                      stateChangeTodo(todo.id, 'FormUntouchedToStart');
+                    }}
+                ><CheckIcon /></Button>
+                <EditModal 
+                  editTodo={editTodo} 
+                  todoId={todo.id} 
+                  status={'Untouched'} 
+                  setTextName={setTextName} 
+                  setTextDetail={setTextDetail}
+                  textName={textName}
+                  textDetail={textDetail}
+                />
+                <Button onClick={() => deleteTodo(todo.id, 'Untouched')}>
+                  <DeleteIcon />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </Box>
+      }
+      {startListShow &&
+        <Box>
+          <label>着手</label>
+          <ul style={{listStyle: 'none'}} className='startList'>
+            {startTodoList.map((todo) => (
+              <li>
               {todo.id} :【 {todo.name} 】
               <br/>
               {todo.detail}
@@ -214,39 +255,42 @@ const Todo:React.FC = () => {
             </li>
           ))}
         </ul>
-      </Box>
-      <Box>
-        <label>完了</label>
-        <ul style={{listStyle: 'none'}} className='completeList'>
-          {completeTodoList.map((todo) => (
-            <li>
-              {todo.id} :【 {todo.name} 】
-              <br/>
-              {todo.detail}
-              <br/>
-              <EditModal 
-                editTodo={editTodo} 
-                todoId={todo.id} 
-                status={'complete'} 
-                setTextName={setTextName}
-                setTextDetail={setTextDetail}
-                textName={textName}
-                textDetail={textDetail}
-                />
-              <Button
-                onClick={() => {
-                  stateChangeTodo(todo.id, 'FormCompleteToStart');
-                }}
-              ><ArrowBackIcon /></Button>
-              <Button onClick={() => deleteTodo(todo.id, 'Complete')}>
-                <DeleteIcon />
-              </Button>
-            </li>
-          ))}
-        </ul>
-      </Box>
+            </Box>
+
+      }
+      {completeListShow &&
+        <Box>
+          <label>完了</label>
+          <ul style={{listStyle: 'none'}} className='completeList'>
+            {completeTodoList.map((todo) => (
+              <li>
+                {todo.id} :【 {todo.name} 】
+                <br/>
+                {todo.detail}
+                <br/>
+                <EditModal 
+                  editTodo={editTodo} 
+                  todoId={todo.id} 
+                  status={'Complete'} 
+                  setTextName={setTextName}
+                  setTextDetail={setTextDetail}
+                  textName={textName}
+                  textDetail={textDetail}
+                  />
+                <Button
+                  onClick={() => {
+                    stateChangeTodo(todo.id, 'FormCompleteToStart');
+                  }}
+                ><ArrowBackIcon /></Button>
+                <Button onClick={() => deleteTodo(todo.id, 'Complete')}>
+                  <DeleteIcon />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </Box>
+      }
     </VStack>
-    
   )
 }
 
